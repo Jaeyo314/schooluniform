@@ -20,6 +20,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-family:
@@ -1363,18 +1364,39 @@ p {
     padding: 0 16px;
   }
 
+  .brand,
   .top-nav {
-    gap: 12px;
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .brand span:last-child {
+    max-width: 136px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .page-shell {
-    padding: 22px 14px 156px;
+    width: 100%;
+    overflow-x: clip;
+    padding: 16px 14px 164px;
+  }
+
+  .checkout-config,
+  .apple-order,
+  .config-column,
+  .summary-column {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .config-heading {
-    min-height: 138px;
-    margin: -22px calc(50% - 50vw) 18px;
-    padding: 34px 14px 22px;
+    width: calc(100% + 28px);
+    min-height: 132px;
+    margin: -16px -14px 18px;
+    padding: 32px 14px 20px;
     border-radius: 0;
   }
 
@@ -1382,13 +1404,14 @@ p {
     top: 58px;
     width: calc(100% - 20px);
     min-height: 58px;
+    gap: 10px;
     padding: 9px 10px 9px 14px;
     border-radius: 22px;
   }
 
   .apple-order {
-    gap: 26px;
-    padding-top: 12px;
+    gap: 22px;
+    padding-top: 0;
   }
 
   .product-card,
@@ -1419,11 +1442,23 @@ p {
   }
 
   .apple-order .config-heading h1 {
-    font-size: 40px;
+    font-size: 36px;
+    line-height: 1.04;
   }
 
   .compact-top-widget strong {
     font-size: 17px;
+  }
+
+  .compact-top-chips {
+    gap: 5px;
+  }
+
+  .compact-top-widget .live-chip,
+  .live-chip {
+    min-height: 30px;
+    padding: 0 11px;
+    font-size: 11px;
   }
 
   .product-meta {
@@ -1497,18 +1532,60 @@ p {
     font-size: 32px;
   }
 
+  .choice-grid,
+  .customer-grid,
+  .field-row {
+    width: 100%;
+    max-width: calc(100vw - 28px);
+  }
+
+  .choice-grid {
+    gap: 10px;
+  }
+
   .size-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .choice-card {
+    min-height: 72px;
+    padding: 12px 8px;
+  }
+
+  .choice-card span {
+    font-size: 18px;
+  }
+
   .option-card {
-    min-height: 78px;
-    align-items: flex-start;
-    padding: 16px;
+    width: 100%;
+    max-width: calc(100vw - 28px);
+    min-height: 76px;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 14px;
+  }
+
+  .option-card::after {
+    width: 21px;
+    height: 21px;
+  }
+
+  .option-title {
+    font-size: 16px;
+  }
+
+  .option-subtitle,
+  .option-price {
+    font-size: 12px;
   }
 
   .option-price {
     align-self: center;
+  }
+
+  .field-row input {
+    height: 48px;
+    font-size: 15px;
   }
 
   .field-row,
@@ -1536,10 +1613,12 @@ p {
 
   .floating-summary {
     bottom: max(10px, env(safe-area-inset-bottom));
-    width: calc(100% - 20px);
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
   }
 
   .liquid-checkout {
+    width: 100%;
     grid-template-columns: minmax(0, 1fr) minmax(104px, 132px);
     gap: 10px;
     padding: 10px;
@@ -1566,5 +1645,89 @@ p {
   .admin-form input {
     min-width: 0;
     width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .site-header {
+    padding: 0 12px;
+  }
+
+  .top-nav {
+    gap: 9px;
+  }
+
+  .page-shell {
+    padding-inline: 12px;
+    padding-bottom: 158px;
+  }
+
+  .choice-grid,
+  .customer-grid,
+  .field-row {
+    max-width: calc(100vw - 24px);
+  }
+
+  .config-heading {
+    width: calc(100% + 24px);
+    min-height: 122px;
+    margin-right: -12px;
+    margin-left: -12px;
+    padding: 28px 12px 18px;
+  }
+
+  .apple-order .config-heading h1 {
+    font-size: 31px;
+  }
+
+  .compact-chips {
+    gap: 6px;
+    padding-top: 14px;
+  }
+
+  .compact-top-widget {
+    top: 54px;
+    width: calc(100% - 16px);
+    min-height: 54px;
+    padding: 8px 9px 8px 12px;
+    border-radius: 20px;
+  }
+
+  .compact-top-widget strong {
+    max-width: 92px;
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .option-card {
+    max-width: calc(100vw - 24px);
+    min-height: 74px;
+    padding: 14px 13px;
+  }
+
+  .option-price {
+    margin-left: 4px;
+  }
+
+  .floating-summary {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+
+  .liquid-checkout {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .liquid-price #totalPrice {
+    font-size: 19px;
+  }
+
+  .liquid-checkout .primary-button {
+    min-height: 44px;
+    font-size: 13px;
   }
 }
