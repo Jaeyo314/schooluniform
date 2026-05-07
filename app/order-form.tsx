@@ -34,7 +34,7 @@ export default function OrderForm() {
   async function createOrder() {
     setIsSubmitting(true);
     setIsError(false);
-    setStatus("Creating Payment Link...");
+    setStatus("Creating Link Checkout...");
 
     try {
       const response = await fetch("/api/orders", {
@@ -57,7 +57,7 @@ export default function OrderForm() {
 
       const data = (await response.json()) as { paymentUrl?: string; message?: string };
       if (!response.ok || !data.paymentUrl) {
-        throw new Error(data.message || "Cannot create Payment Link");
+        throw new Error(data.message || "Cannot create Link Checkout");
       }
 
       setStatus("Your payment is ready.");

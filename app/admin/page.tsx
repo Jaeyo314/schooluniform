@@ -26,6 +26,9 @@ function statusLabel(status: string) {
   if (status === "partial_canceled") {
     return "Partially canceled";
   }
+  if (status === "expired") {
+    return "Expired";
+  }
   return "Pending";
 }
 
@@ -70,7 +73,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <th>Options</th>
                 <th>Amount</th>
                 <th>Payment link</th>
-                <th>Toss order</th>
+                <th>Stripe payment</th>
               </tr>
             </thead>
             <tbody>
@@ -100,7 +103,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                       <span className="muted">None</span>
                     )}
                   </td>
-                  <td>{order.toss_order_key ?? <span className="muted">-</span>}</td>
+                  <td>{order.provider_order_key ?? order.payment_reference ?? <span className="muted">-</span>}</td>
                 </tr>
               ))}
               {orders.length === 0 ? (

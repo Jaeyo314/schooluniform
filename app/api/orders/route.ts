@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { attachPaymentLink, insertOrder } from "@/lib/db";
 import { calculateTotal, normalizeOrderInput } from "@/lib/pricing";
-import { createPaymentLink } from "@/lib/toss-linkpay";
+import { createPaymentLink } from "@/lib/stripe-link";
 
 export async function POST(request: Request) {
   try {
@@ -10,8 +10,9 @@ export async function POST(request: Request) {
     const orderId = crypto.randomUUID();
 
     await insertOrder(orderId, input, amount);
-    const payment = await createPaymentLink(orderId, input, amount);
-    const order = await attachPaymentLink(orderId, payment.productKey, payment.paymentUrl);
+    const origin = new URL(request.url).origin;
+    const payment = await createPaymentLink(orderId, input, amount, origin);
+    const order = await attachPaymentLink(orderId, payment.paymentReference, payment.paymentUrl);
 
     return NextResponse.json({
       orderId: order.id,

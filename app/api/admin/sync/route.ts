@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { markPaidByProductKey } from "@/lib/db";
-import { findPaidProductKeys, listTossOrders } from "@/lib/toss-linkpay";
+import { markPaidByPaymentReference } from "@/lib/db";
+import { getStripePaymentIntentId, listPaidCheckoutSessions } from "@/lib/stripe-link";
 
 export async function POST(request: Request) {
   const secret = request.headers.get("x-admin-secret");
@@ -9,12 +9,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const tossOrders = await listTossOrders();
-    const paid = findPaidProductKeys(tossOrders);
+    const sessions = await listPaidCheckoutSessions();
     let updated = 0;
 
-    for (const [productKey, order] of paid) {
-      const row = await markPaidByProductKey(productKey, order.orderKey, order);
+    for (const session of sessions) {
+      const row = await markPaidByPaymentReference(session.id, getStripePaymentIntentId(session), session);
       if (row) {
         updated += 1;
       }

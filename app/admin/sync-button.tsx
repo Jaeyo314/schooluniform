@@ -33,7 +33,7 @@ export default function SyncButton({ secret }: { secret: string }) {
   return (
     <div>
       <button className="primary-button" type="button" onClick={sync} disabled={pending}>
-        {pending ? "Syncing" : "Sync Toss Payments"}
+        {pending ? "Syncing" : "Sync Stripe Payments"}
       </button>
       {message ? <p className="status-message">{message}</p> : null}
     </div>

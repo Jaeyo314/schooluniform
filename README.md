@@ -1,6 +1,6 @@
 # Class Uniform Order Website
 
-An Apple checkout-inspired class uniform order website. Orders are saved to the database, and Toss Payments LinkPay creates a payment link for checkout.
+An Apple checkout-inspired class uniform order website. Orders are saved to the database, and Stripe Checkout creates a Link-enabled payment page for checkout.
 
 ## Environment Variables
 
@@ -8,25 +8,27 @@ Add the following values to `.env.local` or Vercel Environment Variables.
 
 ```bash
 DATABASE_URL="postgres://USER:PASSWORD@HOST.neon.tech/DB?sslmode=require"
-TOSS_SECRET_KEY="test_sk_..."
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
 ADMIN_SECRET="change-this-admin-secret"
 ```
 
 - `DATABASE_URL`: Neon Postgres or another Vercel-compatible Postgres connection string
-- `TOSS_SECRET_KEY`: Secret key issued after setting up Toss Payments LinkPay
+- `STRIPE_SECRET_KEY`: Stripe secret key used to create Checkout Sessions
+- `STRIPE_WEBHOOK_SECRET`: Stripe webhook endpoint signing secret
 - `ADMIN_SECRET`: Secret key for the `/admin?secret=...` admin page
 
 ## Production Integration
 
 1. Create a Neon Postgres or compatible Postgres database and set `DATABASE_URL`.
-2. Set `TOSS_SECRET_KEY` after configuring Toss Payments LinkPay.
-3. Deploy to Vercel, then register the following URL in the Toss Payments Developer Center webhook settings.
+2. Create a Stripe account, enable Link in your Stripe payment method settings, and set `STRIPE_SECRET_KEY`.
+3. Deploy to Vercel, then register the following URL in Stripe webhook settings.
 
 ```text
-https://YOUR_DOMAIN/api/toss/webhook
+https://YOUR_DOMAIN/api/stripe/webhook
 ```
 
-Select the `ORDER_PAYMENT_STATUS_CHANGED` event. When a payment is approved, the order status in the database is updated to `paid`. Canceled and partially canceled payments are also reflected in the admin page.
+Select the `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.expired` events. When a payment is approved, the order status in the database is updated to `paid`.
 
 ## Run Locally
 
