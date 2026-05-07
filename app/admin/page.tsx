@@ -1,7 +1,5 @@
 import { hasDatabase, listOrders } from "@/lib/db";
 import { formatWon } from "@/lib/pricing";
-import SyncButton from "./sync-button";
-
 type AdminPageProps = {
   searchParams: Promise<{
     secret?: string;
@@ -17,19 +15,10 @@ function formatDate(value: string) {
 }
 
 function statusLabel(status: string) {
-  if (status === "paid") {
-    return "Paid";
+  if (status === "registered" || status === "pending") {
+    return "Registered";
   }
-  if (status === "canceled") {
-    return "Canceled";
-  }
-  if (status === "partial_canceled") {
-    return "Partially canceled";
-  }
-  if (status === "expired") {
-    return "Expired";
-  }
-  return "Pending";
+  return status;
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
@@ -46,7 +35,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <p className="eyebrow">Class Uniform Admin</p>
           <h1>Order Management</h1>
         </div>
-        {isAuthed ? <SyncButton secret={secret} /> : null}
       </section>
 
       {!isAuthed ? (
@@ -72,8 +60,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 <th>Customer</th>
                 <th>Options</th>
                 <th>Amount</th>
-                <th>Payment link</th>
-                <th>Stripe payment</th>
               </tr>
             </thead>
             <tbody>
@@ -94,21 +80,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     {order.long_sleeve_enabled ? "Long sleeve" : "Short sleeve"}
                   </td>
                   <td>{formatWon(order.amount)}</td>
-                  <td>
-                    {order.payment_url ? (
-                      <a href={order.payment_url} target="_blank" rel="noreferrer">
-                        Open
-                      </a>
-                    ) : (
-                      <span className="muted">None</span>
-                    )}
-                  </td>
-                  <td>{order.provider_order_key ?? order.payment_reference ?? <span className="muted">-</span>}</td>
                 </tr>
               ))}
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="muted">
+                  <td colSpan={5} className="muted">
                     No orders have been saved yet.
                   </td>
                 </tr>

@@ -29,10 +29,6 @@ export type StoredOrder = {
   long_sleeve_enabled: boolean;
   amount: number;
   status: string;
-  payment_reference: string | null;
-  payment_url: string | null;
-  provider_order_key: string | null;
-  payment_approved_at: string | null;
 };
 
 export function hasDatabase() {
@@ -58,20 +54,11 @@ export async function ensureSchema() {
       pants_enabled boolean NOT NULL,
       long_sleeve_enabled boolean NOT NULL,
       amount integer NOT NULL,
-      status text NOT NULL DEFAULT 'pending',
-      payment_reference text,
-      payment_url text,
-      provider_order_key text,
-      payment_approved_at timestamptz,
-      raw_payment jsonb
+      status text NOT NULL DEFAULT 'registered'
     )
   `;
 
-  await sql`ALTER TABLE uniform_orders ADD COLUMN IF NOT EXISTS payment_reference text`;
-  await sql`ALTER TABLE uniform_orders ADD COLUMN IF NOT EXISTS payment_url text`;
-  await sql`ALTER TABLE uniform_orders ADD COLUMN IF NOT EXISTS provider_order_key text`;
   await sql`CREATE INDEX IF NOT EXISTS uniform_orders_created_idx ON uniform_orders (created_at DESC)`;
-  await sql`CREATE INDEX IF NOT EXISTS uniform_orders_payment_reference_idx ON uniform_orders (payment_reference)`;
   schemaReady = true;
 }
 
@@ -92,7 +79,8 @@ export async function insertOrder(id: string, order: OrderInput, amount: number)
       initial_text,
       pants_enabled,
       long_sleeve_enabled,
-      amount
+      amount,
+      status
     )
     VALUES (
       ${id},
@@ -103,27 +91,9 @@ export async function insertOrder(id: string, order: OrderInput, amount: number)
       ${order.initialEnabled ? order.initialText : null},
       ${order.pantsEnabled},
       ${order.longSleeveEnabled},
-      ${amount}
+      ${amount},
+      ${"registered"}
     )
-    RETURNING *
-  `;
-
-  return rows[0] as StoredOrder;
-}
-
-export async function attachPaymentLink(id: string, paymentReference: string, paymentUrl: string) {
-  const sql = getSql();
-  if (!sql) {
-    throw new Error("DATABASE_URL is not configured.");
-  }
-  await ensureSchema();
-
-  const rows = await sql`
-    UPDATE uniform_orders
-    SET payment_reference = ${paymentReference},
-        payment_url = ${paymentUrl},
-        updated_at = now()
-    WHERE id = ${id}
     RETURNING *
   `;
 
@@ -145,64 +115,4 @@ export async function listOrders() {
   `;
 
   return rows as StoredOrder[];
-}
-
-export async function markPaidByPaymentReference(paymentReference: string, providerOrderKey: string, rawPayment: unknown) {
-  const sql = getSql();
-  if (!sql) {
-    return null;
-  }
-  await ensureSchema();
-
-  const rows = await sql`
-    UPDATE uniform_orders
-    SET status = 'paid',
-        provider_order_key = ${providerOrderKey},
-        payment_approved_at = now(),
-        raw_payment = ${JSON.stringify(rawPayment)}::jsonb,
-        updated_at = now()
-    WHERE payment_reference = ${paymentReference}
-    RETURNING *
-  `;
-
-  return (rows[0] as StoredOrder | undefined) ?? null;
-}
-
-export async function updateOrderPaymentByReference(
-  paymentReference: string,
-  providerOrderKey: string,
-  amount: number | null,
-  status: string,
-  rawPayment: unknown,
-) {
-  const sql = getSql();
-  if (!sql) {
-    return null;
-  }
-  await ensureSchema();
-
-  const normalizedStatus =
-    status === "DONE" || status === "paid"
-      ? "paid"
-      : status === "CANCELED" || status === "canceled"
-        ? "canceled"
-        : status === "PARTIAL_CANCELED" || status === "partial_canceled"
-          ? "partial_canceled"
-          : status === "expired"
-            ? "expired"
-            : "pending";
-
-  const rows = await sql`
-    UPDATE uniform_orders
-    SET status = ${normalizedStatus},
-        provider_order_key = ${providerOrderKey},
-        payment_approved_at = ${normalizedStatus === "paid" ? new Date().toISOString() : null},
-        raw_payment = ${JSON.stringify(rawPayment)}::jsonb,
-        updated_at = now()
-    WHERE payment_reference = ${paymentReference}
-      AND (${amount}::integer IS NULL OR amount = ${amount})
-    RETURNING *
-  `;
-
-  return (rows[0] as StoredOrder | undefined) ?? null;
 }

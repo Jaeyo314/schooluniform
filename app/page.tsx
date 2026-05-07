@@ -10,7 +10,7 @@ export default function HomePage() {
         </a>
         <nav className="top-nav" aria-label="Menu">
           <a href="#options">Options</a>
-          <a href="#summary">Payment</a>
+          <a href="#summary">Register</a>
         </nav>
       </header>
       <OrderForm />

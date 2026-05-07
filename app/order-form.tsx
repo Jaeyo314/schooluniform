@@ -32,9 +32,14 @@ export default function OrderForm() {
   );
 
   async function createOrder() {
+    const confirmed = window.confirm(`Confirm this order amount: ${formatWon(total)}?`);
+    if (!confirmed) {
+      return;
+    }
+
     setIsSubmitting(true);
     setIsError(false);
-    setStatus("Creating Link Checkout...");
+    setStatus("Registering order...");
 
     try {
       const response = await fetch("/api/orders", {
@@ -55,13 +60,13 @@ export default function OrderForm() {
         }),
       });
 
-      const data = (await response.json()) as { paymentUrl?: string; message?: string };
-      if (!response.ok || !data.paymentUrl) {
-        throw new Error(data.message || "Cannot create Link Checkout");
+      const data = (await response.json()) as { orderId?: string; amount?: number; message?: string };
+      if (!response.ok || !data.orderId) {
+        throw new Error(data.message || "Cannot register order");
       }
 
-      setStatus("Your payment is ready.");
-      window.location.href = data.paymentUrl;
+      setStatus(`Order registered. Confirmed amount: ${formatWon(data.amount ?? total)}.`);
+      window.alert(`Order registered.\nConfirmed amount: ${formatWon(data.amount ?? total)}`);
     } catch (error) {
       setIsError(true);
       setStatus(error instanceof Error ? error.message : "Cannot create order");
@@ -270,9 +275,9 @@ export default function OrderForm() {
             >
               <span className="option-main">
                 <span className="option-title">Long sleeve</span>
-                <span className="option-subtitle">No extra payment</span>
+                <span className="option-subtitle">No extra cost</span>
               </span>
-              <span className="option-price">+0$</span>
+              <span className="option-price">+0₩</span>
             </button>
           </section>
         </section>
@@ -283,7 +288,7 @@ export default function OrderForm() {
               <strong id="totalPrice">{formatWon(total)}</strong>
             </div>
             <button className="primary-button" type="button" onClick={createOrder} disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Payment"}
+              {isSubmitting ? "Registering..." : "Register"}
             </button>
             {status ? (
               <p className={`status-message ${isError ? "error" : ""}`} role="status" aria-live="polite">
